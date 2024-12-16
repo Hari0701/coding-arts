@@ -1,7 +1,7 @@
-# ASCII Art Generator
+# Coding Arts
 
-Welcome to the ASCII Art Generator project! This project is designed to create stunning ASCII art from text, images, and more.
+Welcome to the Coding Arts project! This project is designed to create arts with code, and more.
 
 ## Installation
 
-To get started with the ASCII Art Generator, clone the repository and open the code in your browser.
+To get started with the Coding Arts, clone the repository and open the code in your browser.
