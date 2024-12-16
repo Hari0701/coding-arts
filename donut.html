@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donut Animation</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000; 
+            margin: 0;
+        }
+        #d {
+            font-family: monospace;
+            white-space: pre;
+             line-height: 1.2;
+            font-size: 14px; 
+            color: #fff; 
+        }
+    </style>
+</head>
+<body>
+    <pre id="d"></pre>
+    <script >
+        (function () {
+  var _onload = function () {
+    var pretag = document.getElementById("d");
+
+    var tmr1 = undefined;
+    var A = 1,
+      B = 1;
+    var R1 = 2;
+    var R2 = 1;
+
+    var asciiframe = function () {
+      var b = [];
+      var z = [];
+      A += 0.07;
+      B += 0.03;
+      var cA = Math.cos(A),
+        sA = Math.sin(A),
+        cB = Math.cos(B),
+        sB = Math.sin(B);
+      for (var k = 0; k < 1760; k++) {
+        b[k] = k % 80 == 79 ? "\n" : " ";
+        z[k] = 0;
+      }
+      for (var j = 0; j < 6.28; j += 0.07) {
+        // j <=> theta
+        var ct = Math.cos(j),
+          st = Math.sin(j);
+        for (i = 0; i < 6.28; i += 0.02) {
+          // i <=> phi
+          var sp = Math.sin(i),
+            cp = Math.cos(i),
+            h = R2 * ct + R1, // R1 + R2*cos(theta)
+            D = 1 / (sp * h * sA + st * cA + 5), // this is 1/z
+            t = sp * h * cA - st * sA; // this is a clever factoring of some of the terms in x' and y'
+
+          var x = 0 | (40 + 30 * D * (cp * h * cB - t * sB)),
+            y = 0 | (12 + 15 * D * (cp * h * sB + t * cB)),
+            o = x + 80 * y,
+            N = 0 | (8 * ((st * sA - sp * ct * cA) * cB - sp * ct * sA - st * cA - cp * ct * sB));
+          if (y < 22 && y >= 0 && x >= 0 && x < 79 && D > z[o]) {
+            z[o] = D;
+            b[o] = ".,-~:;=!*#$@"[N > 0 ? N : 0];
+          }
+        }
+      }
+      pretag.innerHTML = b.join("");
+    };
+
+    window.anim1 = function () {
+      if (tmr1 === undefined) {
+        tmr1 = setInterval(asciiframe, 70);
+      } else {
+        clearInterval(tmr1);
+        tmr1 = undefined;
+      }
+    };
+
+    asciiframe();
+
+    // Automatically start animation
+    anim1();
+  };
+
+  if (document.all) window.attachEvent("onload", _onload);
+  else window.addEventListener("load", _onload, false);
+})();
+</script>
+</body>
+</html>
