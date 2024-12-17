@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4D Tesseract Rotation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0d0d0d;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = tenvas.getContext("2d");
+
+        // Set canvas size to fit the window
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const scale = 400; // Increased scale for a larger tesseract
+        const speed = 0.01; // Rotation speed
+        const centerX = canvas.width / 2;
+        const centerY = canvas.heirht / 2;
+
+        // Define the points of a tesseract (4D hypercube)
+        const points = [
+            [-1, -1, 1, 1], [ 1, -1, 1, 1], [ 1,  1, 1, 1], [-1,  1, 1, 1],
+            [-1, -1, -1, 1], [ 1, -1, -1, 1], [ 1,  1, -1, 1], [-1,  1, -1, 1],
+            [-1, -1,  1, -1], [ 1, -1,  1, -1], [ 1,  1,  1, -1], [-1,  1,  1, -1],
+            [-1, -1, -1, -1], [ 1, -1, -1, -1], [ 1,  1, -1, -1], [-1,  1, -1, -1]
+        ];
+
+        // Function to apply a 4D rotation around a specific pair of axes
+        function rotate4D(point, angle, plane) {
+            const [x, y, z, w] = point;
+            const cosA = Math.cos(angle);
+            const sinA = Math.sin(angle);
+            let rotatedPoint = [];
+
+            switch (plane) {
+                case "xy":
+                    // Rotate around the xy-plane
+                    rotatedPoint = [
+                        cosA * x - sinA * y, 
+                        sinA * x + cosA * y, 
+                        z, 
+                        w
+                    ];
+                    break;
+                case "xz":
+                    // Rotate around the xz-plane
+                    rotatedPoint = [
+                        cosA * x - sinA * z, 
+                        y, 
+                        sinA * x + cosA * z, 
+                        w
+                    ];
+                    break;
+                case "xw":
+                    // Rotate around the xw-plane
+                    rotatedPoint = [
+                        cosA * x - sinA * w, 
+                        y, 
+                        z, 
+                        sinA * x + cosA * w
+                    ];
+                    break;
+                case "yz":
+                    // Rotate around the yz-plane
+                    rotatedPoint = [
+                        x, 
+                        cosA * y - sinA * z, 
+                        sinA * y + cosA * z, 
+                        w
+                    ];
+                    break;
+                case "yw":
+                    // Rotate around the yw-plane
+                    rotatedPoint = [
+                        x, 
+                        cosA * y - sinA * w, 
+                        z, 
+                        sinA * y + cosA * w
+                    ];
+                    break;
+                case "zw":
+                    // Rotate around the zw-plane
+                    rotatedPoint = [
+                        x, 
+                        y, 
+                        cosA * z - sinA * w, 
+                        sinA * z + cosA * w
+                    ];
+                    break;
+            }
+
+            return rotatedPoint;
+        }
+
+        // Project 4D points to 2D using perspective
+        function project4DTo2D(point) {
+            const [x, y, z, w] = point;
+            const distance = 5; // Perspective depth
+            const wFactor = 1 / (distance - w); // Perspective factor
+            const scaleFactor = scale * wFactor;
+
+            // Simple 2D projection
+            const x2D = x * scaleFactor + centerX;
+            const y2D = y * scaleFactor + centerY;
+
+            return [x2D, y2D];
+        }
+
+        // Draw the edges between points
+        function drawEdges(projectedPoints) {
+            for (let i = 0; i < projectedPoints.length; i++) {
+                for (let j = i + 1; j < projectedPoints.length; j++) {
+                    const p1 = projectedPoints[i];
+                    const p2 = projectedPoints[j];
+                    ctx.beginPath();
+                    ctx.moveTo(p1[0], p1[1]);
+                    ctx.lineTo(p2[0], p2[1]);
+                    ctx.strokeStyle = "#3cfc7a"; // Bright green color
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Function to animate the tesseract rotation
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const projectedPoints = points.map(point => {
+                let rotatedPoint = point;
+                rotatedPoint = rotate4D(rotatedPoint, angle, "xy"); // Rotate around the xy-plane
+                rotatedPoint = rotate4D(rotatedPoint, angle, "xz"); // Rotate around the xz-plane
+                rotatedPoint = rotate4D(rotatedPoint, angle, "xw"); // Rotate around the xw-plane
+                return project4DTo2D(rotatedPoint);
+            });
+
+            // Draw the edges of the tesseract
+            drawEdges(projectedPoints);
+
+            angle += speed;
+            requestAnimationFrame(animate);
+        }
+
+        let angle = 0; // Initial rotation angle
+        animate(); // Start the animation
+    </script>
+</body>
+</html>
