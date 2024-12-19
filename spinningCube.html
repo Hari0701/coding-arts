@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta /harset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rotating ASCII Cube</title>
+    <style>
+      body {
+        background-color: black;
+        color: white;
+        font-family: monospace;
+        overflow: hidden;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+      }
+      pre {
+        white-space: pre-wrap; /* To make sure long lines wrap */
+        word-wrap: break-word;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <pre id="ascii-output"></pre>
+    <!-- This is where the ASCII cube will be rendered -->
+
+    <script>
+      const width = 160;
+      const height = 44;
+      let zBuffer = Array(width * height).fill(0);
+      let buffer = Array(width * height).fill(".");
+      let backgroundASCIICode = ".";
+      let distanceFromCam = 100;
+      let K1 = 40;
+      let incrementSpeed = 0.6;
+      let A = 0,
+        B = 0,
+        C = 0;
+      let x, y, z, ooz;
+      let xp, yp, idx;
+
+      function calculateX(i, j, k) {
+        return (
+          j * Math.sin(A) * Math.sin(B) * Math.cos(C) -
+          k * Math.cos(A) * Math.sin(B) * Math.cos(C) +
+          j * Math.cos(A) * Math.sin(C) +
+          k * Math.sin(A) * Math.sin(C) +
+          i * Math.cos(B) * Math.cos(C)
+        );
+      }
+
+      function calculateY(i, j, k) {
+        return (
+          j * Math.cos(A) * Math.cos(C) +
+          k * Math.sin(A) * Math.cos(C) -
+          j * Math.sin(A) * Math.sin(B) * Math.sin(C) +
+          k * Math.cos(A) * Math.sin(B) * Math.sin(C) -
+          i * Math.cos(B) * Math.sin(C)
+        );
+      }
+
+      function calculateZ(i, j, k) {
+        return k * Math.cos(A) * Math.cos(B) - j * Math.sin(A) * Math.cos(B) + i * Math.sin(B);
+      }
+
+      function calculateForSurface(cubeX, cubeY, cubeZ, ch) {
+        x = calculateX(cubeX, cubeY, cubeZ);
+        y = calculateY(cubeX, cubeY, cubeZ);
+        z = calculateZ(cubeX, cubeY, cubeZ) + distanceFromCam;
+
+        ooz = 1 / z;
+
+        xp = Math.floor(width / 2 + K1 * ooz * x * 2);
+        yp = Math.floor(height / 2 + K1 * ooz * y);
+
+        idx = xp + yp * width;
+        if (idx >= 0 && idx < width * height) {
+          if (ooz > zBuffer[idx]) {
+            zBuffer[idx] = ooz;
+            buffer[idx] = ch;
+          }
+        }
+      }
+
+      function drawCube() {
+        let cubeWidth = 10; // Size of the cube
+        for (let cubeX = -cubeWidth; cubeX < cubeWidth; cubeX += incrementSpeed) {
+          for (let cubeY = -cubeWidth; cubeY < cubeWidth; cubeY += incrementSpeed) {
+            calculateForSurface(cubeX, cubeY, -cubeWidth, "@");
+            calculateForSurface(cubeWidth, cubeY, cubeX, "$");
+            calculateForSurface(-cubeWidth, cubeY, -cubeX, "~");
+            calculateForSurface(-cubeX, cubeY, cubeWidth, "#");
+            calculateForSurface(cubeX, -cubeWidth, -cubeY, ";");
+            calculateForSurface(cubeX, cubeWidth, cubeY, "+");
+          }
+        }
+      }
+
+      function render() {
+        const outputElement = document.getElementById("ascii-output");
+        let output = "";
+
+        for (let i = 0; i < width * height; i++) {
+          output += (i % width === 0 ? "\n" : "") + buffer[i];
+        }
+
+        outputElement.textContent = output;
+
+        A += 0.05;
+        B += 0.05;
+        C += 0.01;
+      }
+
+      function main() {
+        setInterval(() => {
+          zBuffer.fill(0);
+          buffer.fill(backgroundASCIICode, 0, width * height);
+          drawCube();
+          render();
+        }, 100); // Update every 100ms (adjust for desired speed)
+      }
+
+      main();
+    </script>
+  </body>
+</html>
