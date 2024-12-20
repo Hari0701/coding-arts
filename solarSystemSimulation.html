@@ -125,14 +125,15 @@
           this.size = size;
           this.color = color;
           this.angle = Math.random() * 2 * Math.PI; // Start at a random angle
-          this.speed = speedFactor;
+          this.speedFactor = speedFactor;
           this.x = 0;
           this.y = 0;
+          this.velocity = Math.sqrt((G * starMass) / distance); // Initial velocity
         }
 
         // Update Position
         update(centerX, centerY) {
-          this.angle += this.speed * 0.01;
+          this.angle += this.velocity * this.speedFactor * 0.0001;
           this.x = centerX + this.distance * Math.cos(this.angle);
           this.y = centerY + this.distance * Math.sin(this.angle);
         }
