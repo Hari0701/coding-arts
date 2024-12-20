@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solar System Simulation</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+        background: radial-gradient(circle, #000015, #000);
+        color: white;
+        overflow: hidden;
+      }
+
+      #formContainer {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+      }
+
+      #formContainer h1 {
+        margin-bottom: 20px;
+        font-size: 2rem;
+      }
+
+      #formContainer label {
+        font-size: 1rem;
+        margin-top: 10px;
+      }
+
+      #formContainer input,
+      #formContainer button {
+        font-size: 1rem;
+        padding: 10px;
+        margin: 10px 0;
+        width: 90%;
+        max-width: 300px;
+        border: none;
+        border-radius: 5px;
+      }
+
+      #formContainer button {
+        background: #007bff;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      #formContainer button:hover {
+        background: #0056b3;
+      }
+
+      canvas {
+        display: block;
+        margin: 0 auto;
+        background: radial-gradient(circle at center, #001, #000);
+      }
+
+      .planet-label {
+        position: absolute;
+        font-size: 14px;
+        color: white;
+        pointer-events: none;
+        transform: translate(-50%, -100%); /* Label appears above the planet */
+        background: rgba(0, 0, 0, 0.5);
+        padding: 2px 5px;
+        border-radius: 5px;
+      }
+
+      #solarCanvas {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Form for Input -->
+    <div id="formContainer">
+      <h1>Interactive Solar System Simulation</h1>
+      <label for="starMass">Mass of Central Star (Sun):</label>
+      <input type="number" id="starMass" value="1000" min="100" max="5000" />
+      <button onclick="startSimulation()">Start Simulation</button>
+    </div>
+
+    <!-- Canvas for Simulation -->
+    <canvas id="solarCanvas"></canvas>
+
+    <script>
+      const canvas = document.getElementById("solarCanvas");
+      const ctx = canvas.getContext("2d");
+      const G = 1; // Gravitational constant for simulation
+      let starMass = 1000;
+      const planets = [];
+      const labels = [];
+
+      // Planet Data
+      const planetData = [
+        { name: "Mercury", distance: 50, size: 6, color: "#a89f94", speedFactor: 4 },
+        { name: "Venus", distance: 80, size: 8, color: "#e3c16f", speedFactor: 2.5 },
+        { name: "Earth", distance: 120, size: 9, color: "#00aaff", speedFactor: 2 },
+        { name: "Mars", distance: 160, size: 7, color: "#ff4500", speedFactor: 1.6 },
+        { name: "Jupiter", distance: 220, size: 14, color: "#ffaf7a", speedFactor: 0.8 },
+        { name: "Saturn", distance: 280, size: 12, color: "#f7d399", speedFactor: 0.5 },
+        { name: "Uranus", distance: 340, size: 10, color: "#7fffd4", speedFactor: 0.4 },
+        { name: "Neptune", distance: 400, size: 10, color: "#4682b4", speedFactor: 0.3 },
+      ];
+
+      // Planet Class
+      class Planet {
+        constructor(name, distance, size, color, speedFactor) {
+          this.name = name;
+          this.distance = distance;
+          this.size = size;
+          this.color = color;
+          this.angle = Math.random() * 2 * Math.PI; // Start at a random angle
+          this.speed = speedFactor;
+          this.x = 0;
+          this.y = 0;
+        }
+
+        // Update Position
+        update(centerX, centerY) {
+          this.angle += this.speed * 0.01;
+          this.x = centerX + this.distance * Math.cos(this.angle);
+          this.y = centerY + this.distance * Math.sin(this.angle);
+        }
+
+        // Draw Planet
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+        }
+      }
+
+      // Create Planet Labels
+      function createPlanetLabels() {
+        planets.forEach((planet) => {
+          const label = document.createElement("div");
+          label.classList.add("planet-label");
+          label.innerText = planet.name;
+          document.body.appendChild(label);
+          labels.push({ planet, element: label });
+        });
+      }
+
+      // Update Labels
+      function updateLabels() {
+        labels.forEach(({ planet, element }) => {
+          element.style.left = `${planet.x}px`;
+          element.style.top = `${planet.y - planet.size}px`; // Offset the label by planet size
+        });
+      }
+
+      // Draw Central Star
+      function drawStar(centerX, centerY) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 30, 0, 2 * Math.PI); // Increased Sun size
+        ctx.fillStyle = "yellow";
+        ctx.fill();
+      }
+
+      // Initialize Planets
+      function initializePlanets() {
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+
+        planetData.forEach((data) => {
+          const planet = new Planet(data.name, data.distance, data.size, data.color, data.speedFactor);
+          planet.update(centerX, centerY);
+          planets.push(planet);
+        });
+        createPlanetLabels();
+      }
+
+      // Animation Loop
+      function animate() {
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Star
+        drawStar(centerX, centerY);
+
+        // Update and Draw Planets
+        planets.forEach((planet) => {
+          planet.update(centerX, centerY);
+          planet.draw();
+        });
+
+        // Update Labels
+        updateLabels();
+
+        requestAnimationFrame(animate);
+      }
+
+      // Start Simulation
+      function startSimulation() {
+        // Get User Input
+        starMass = parseInt(document.getElementById("starMass").value);
+
+        // Hide Form and Show Canvas
+        document.getElementById("formContainer").style.display = "none";
+        canvas.style.display = "block";
+
+        // Fullscreen Canvas
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        initializePlanets();
+        animate();
+      }
+    </script>
+  </body>
+</html>
