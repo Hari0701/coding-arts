@@ -138,33 +138,35 @@
     <h1>Image To ASCII Converter</h1>
 
     <!-- Form Section -->
-    <form>
-      <div class="form-group">
-        <label for="file-upload">Upload Image:</label>
-        <input type="file" id="file-upload" accept="image/*" />
-      </div>
-      <div class="form-group">
-        <label for="step-count">Steps:</label>
-        <input type="number" id="step-count" value="5" min="1" />
-      </div>
-      <div class="form-group">
-        <label for="line-height">Line Height:</label>
-        <input type="number" id="line-height" value="9" min="0" />
-      </div>
-      <div class="form-group">
-        <label for="letter-spacing">Line Width:</label>
-        <input type="number" id="letter-spacing" value="1" min="0" />
-      </div>
-      <div class="form-group">
-        <label for="density-string">Density String:</label>
-        <input type="text" id="density-string" value="@&%QWNMd13z/*!+<>;=^,_:'-.` " />
-      </div>
-    </form>
+    <div style="display: flex; gap: 20px; margin-left: 200px">
+      <form>
+        <div class="form-group">
+          <label for="file-upload">Upload Image:</label>
+          <input type="file" id="file-upload" accept="image/*" />
+        </div>
+        <div class="form-group">
+          <label for="step-count">Steps:</label>
+          <input type="number" id="step-count" value="5" min="1" />
+        </div>
+        <div class="form-group">
+          <label for="line-height">Line Height:</label>
+          <input type="number" id="line-height" value="9" min="0" />
+        </div>
+        <div class="form-group">
+          <label for="letter-spacing">Line Width:</label>
+          <input type="number" id="letter-spacing" value="1" min="0" />
+        </div>
+        <div class="form-group">
+          <label for="density-string">Density String:</label>
+          <input type="text" id="density-string" value="@&%QWNMd13z/*!+<>;=^,_:'-.` " />
+        </div>
+      </form>
+      <canvas id="image-canvas" style="width: 25%; height: 25%"></canvas>
+    </div>
 
     <!-- Wrapper for Canvas and Output -->
     <div id="wrapper">
-      <canvas id="image-canvas"></canvas>
-      <textarea id="image-textarea" placeholder="ASCII output will appear here..."></textarea>
+      <textarea id="image-textarea" placeholder="ASCII output will appear here..." style="margin-left: 20%"></textarea>
     </div>
 
     <script>
