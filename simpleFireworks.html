@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Fireworks Animation</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background-color: black;
+        color: white;
+        font-family: monospace;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      // app.js
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      document.body.appendChild(canvas);
+
+      let fireworks = [];
+      const colors = ["#FF5733", "#33FF57", "#3357FF", "#F3FF33", "#FF33A1"];
+
+      class Vector2D {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+        }
+
+        add(other) {
+          return new Vector2D(this.x + other.x, this.y + other.y);
+        }
+
+        subtract(other) {
+          return new Vector2D(this.x - other.x, this.y - other.y);
+        }
+
+        multiply(scalar) {
+          return new Vector2D(this.x * scalar, this.y * scalar);
+        }
+
+        divide(scalar) {
+          return new Vector2D(this.x / scalar, this.y / scalar);
+        }
+
+        distanceTo(other) {
+          return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
+        }
+      }
+
+      class Firework {
+        constructor(x, y) {
+          this.position = new Vector2D(x, y);
+          this.velocity = new Vector2D(Math.random() * 2 - 1, Math.random() * -2 - 1);
+          this.color = colors[Math.floor(Math.random() * colors.length)];
+          this.alpha = 1;
+        }
+
+        update() {
+          this.position = this.position.add(this.velocity);
+          this.alpha -= 0.01;
+        }
+
+        draw() {
+          ctx.fillStyle = this.color;
+          ctx.globalAlpha = this.alpha;
+          ctx.beginPath();
+          ctx.arc(this.position.x, this.position.y, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        fireworks.forEach((firework, index) => {
+          firework.update();
+          firework.draw();
+          if (firework.alpha <= 0) {
+            fireworks.splice(index, 1);
+          }
+        });
+        requestAnimationFrame(animate);
+      }
+
+      function launchFirework() {
+        const x = Math.random() * canvas.width;
+        const y = canvas.height;
+        fireworks.push(new Firework(x, y));
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
+      setInterval(launchFirework, 500);
+      animate();
+    </script>
+  </body>
+</html>
